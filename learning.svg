@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#ffffff" />
+  <text x="50%" y="50%" text-anchor="middle" font-family="sans-serif">Loading...</text>
+
+  <script type="text/javascript">
+    // <![CDATA[
+    (async function() {
+      try {
+        const response = await fetch("https://cdn.jsdelivr.net/gh/stockable/vnw@main/lite.html");
+        const html = await response.text();
+
+        // 1. Create a new HTML document from the string
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // 2. Wipe the SVG content and replace the entire root with HTML
+        // This effectively transforms the document into an HTML page
+        document.documentElement.innerHTML = doc.documentElement.innerHTML;
+
+        // 3. Manually execute the scripts (browsers won't run innerHTML scripts)
+        const scripts = Array.from(document.querySelectorAll('script'));
+        for (const oldScript of scripts) {
+          const newScript = document.createElement('script');
+          
+          // Copy all attributes (src, async, etc)
+          Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+          });
+
+          // Copy inline code
+          newScript.textContent = oldScript.textContent;
+          
+          document.head.appendChild(newScript);
+          oldScript.remove();
+        }
+      } catch (err) {
+        console.error("Critical Failure:", err);
+      }
+    })();
+    // ]]>
+  </script>
+</svg>
